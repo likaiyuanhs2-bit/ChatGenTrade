@@ -155,14 +155,14 @@ export function BacktestViewNew({ strategyType = "spot", onNavigateToDeploy }: B
           </button>
         </div>
 
-        {/* Strategy Code Badge */}
-        <div className="px-6 pb-3">
-          <StrategyCodeBadge />
-        </div>
-        
         {/* Chat Area */}
         <div className="flex-1 min-h-0 border-t border-[#1f1f23]">
           <CustomBacktestChat />
+        </div>
+
+        {/* Strategy Code Badge - Bottom */}
+        <div className="px-6 py-3 border-t border-[#1f1f23] flex-shrink-0">
+          <StrategyCodeBadge />
         </div>
       </div>
     );
@@ -368,11 +368,6 @@ export function BacktestViewNew({ strategyType = "spot", onNavigateToDeploy }: B
       
       {/* 右侧策略对话区域 40% */}
       <div className="w-[40%] flex flex-col bg-black">
-        {/* Strategy Code Badge - Top */}
-        <div className="px-6 pt-4 pb-2 flex-shrink-0">
-          <StrategyCodeBadge />
-        </div>
-
         {/* 对话消息 */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {chatMessages.length > 0 && (
@@ -415,6 +410,9 @@ export function BacktestViewNew({ strategyType = "spot", onNavigateToDeploy }: B
         
         {/* 底部对话框 + 回测/部署按钮 */}
         <div className="border-t border-[#1f1f23] px-6 py-5 space-y-3 flex-shrink-0">
+          {/* Strategy Code Badge */}
+          <StrategyCodeBadge />
+
           <div className="flex gap-3">
             <input
               type="text"

@@ -323,11 +323,6 @@ export function DeployStrategy({ onNavigateToDashboard }: DeployStrategyProps) {
 
   return (
     <div className="h-full flex flex-col bg-black">
-      {/* Strategy Code Badge - Top */}
-      <div className="px-6 pt-4 pb-2 flex-shrink-0">
-        <StrategyCodeBadge />
-      </div>
-
       {/* 对话区域 */}
       <div className="flex-1 flex flex-col min-h-0">
         {/* 消息列表 */}
@@ -607,7 +602,10 @@ export function DeployStrategy({ onNavigateToDashboard }: DeployStrategyProps) {
         </div>
 
         {/* 输入框 */}
-        <div className="border-t border-[#1f1f23] p-4">
+        <div className="border-t border-[#1f1f23] p-4 space-y-3">
+          {/* Strategy Code Badge */}
+          <StrategyCodeBadge />
+
           <div className="flex gap-3 items-end">
             <div className="flex-1 bg-[#0a0a0a] border border-[#27272a] rounded-xl focus-within:border-[#3b82f6] transition-colors">
               <textarea

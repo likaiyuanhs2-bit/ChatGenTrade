@@ -75,11 +75,6 @@ export function StrategyChat({ onNavigateToBacktest }: StrategyChatProps) {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Strategy Code Badge - Top */}
-      <div className="px-6 pt-4 pb-2 bg-black flex-shrink-0">
-        <StrategyCodeBadge />
-      </div>
-
       {/* Chat Messages */}
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-5">
         {messages.map((msg, index) => (
@@ -121,7 +116,7 @@ export function StrategyChat({ onNavigateToBacktest }: StrategyChatProps) {
         )}
       </div>
 
-      {/* Input Area + Confirm Button */}
+      {/* Input Area + Strategy Badge + Confirm Button */}
       <div className="border-t border-[#1f1f23] px-6 py-5 bg-black flex-shrink-0 space-y-3">
         <div className="flex gap-3">
           <input
@@ -142,12 +137,17 @@ export function StrategyChat({ onNavigateToBacktest }: StrategyChatProps) {
         </div>
 
         {hasStrategy && (
-          <button
-            className="w-full bg-[#10b981] hover:bg-[#059669] text-white px-5 py-3 rounded-xl transition-all duration-200 font-medium shadow-lg shadow-green-500/20 hover:shadow-green-500/30 tracking-tight"
-            onClick={onNavigateToBacktest}
-          >
-            确认策略并配置回测
-          </button>
+          <div className="flex gap-3 items-end">
+            <div className="flex-1 min-w-0">
+              <StrategyCodeBadge />
+            </div>
+            <button
+              className="flex-shrink-0 bg-[#10b981] hover:bg-[#059669] text-white px-6 py-2.5 rounded-xl transition-all duration-200 font-medium shadow-lg shadow-green-500/20 hover:shadow-green-500/30 tracking-tight text-[14px]"
+              onClick={onNavigateToBacktest}
+            >
+              确认策略并配置回测
+            </button>
+          </div>
         )}
       </div>
     </div>

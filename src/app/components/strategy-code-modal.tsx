@@ -223,28 +223,33 @@ export function StrategyCodeBadge({
   return (
     <>
       {/* Compact Badge */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="w-full flex items-center justify-between bg-[#0a0a0a] border border-[#1f1f23] hover:border-[#3b82f6]/50 rounded-xl px-4 py-3 transition-all duration-200 group"
-      >
-        <div className="flex items-center gap-2.5">
-          <Code2 className="w-4 h-4 text-[#10b981]" />
-          <span className="text-white font-mono text-[13px] tracking-tight">
-            {fileName}
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-[12px] text-[#71717a] group-hover:text-[#3b82f6] transition-colors">
-            查看策略逻辑
-          </span>
-          <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 bg-[#10b981] rounded-full"></div>
-            <span className="text-[#10b981] text-[11px] font-mono font-medium tracking-tight">
-              Ready
+      <div className="space-y-1.5">
+        <span className="text-[12px] text-[#71717a] tracking-tight font-medium">
+          交易策略文件
+        </span>
+        <button
+          onClick={() => setIsOpen(true)}
+          className="w-full flex items-center justify-between bg-[#0a0a0a] border border-[#1f1f23] hover:border-[#3b82f6]/50 rounded-xl px-4 py-2.5 transition-all duration-200 group"
+        >
+          <div className="flex items-center gap-2.5">
+            <Code2 className="w-4 h-4 text-[#10b981]" />
+            <span className="text-white font-mono text-[13px] tracking-tight">
+              {fileName}
             </span>
           </div>
-        </div>
-      </button>
+          <div className="flex items-center gap-2">
+            <span className="text-[12px] text-[#71717a] group-hover:text-[#3b82f6] transition-colors">
+              查看策略逻辑
+            </span>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 bg-[#10b981] rounded-full"></div>
+              <span className="text-[#10b981] text-[11px] font-mono font-medium tracking-tight">
+                Ready
+              </span>
+            </div>
+          </div>
+        </button>
+      </div>
 
       {/* Modal */}
       {isOpen && (

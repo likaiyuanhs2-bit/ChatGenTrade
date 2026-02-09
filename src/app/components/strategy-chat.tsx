@@ -138,11 +138,11 @@ export function StrategyChat({ onNavigateToBacktest }: StrategyChatProps) {
 
         {hasStrategy && (
           <div className="flex gap-3 items-end">
-            <div className="flex-1 min-w-0">
+            <div className="w-[60%] min-w-0">
               <StrategyCodeBadge />
             </div>
             <button
-              className="flex-shrink-0 bg-[#10b981] hover:bg-[#059669] text-white px-6 py-2.5 rounded-xl transition-all duration-200 font-medium shadow-lg shadow-green-500/20 hover:shadow-green-500/30 tracking-tight text-[14px]"
+              className="w-[40%] bg-[#10b981] hover:bg-[#059669] text-white py-2.5 rounded-lg transition-all duration-200 font-medium shadow-lg shadow-green-500/20 hover:shadow-green-500/30 tracking-tight text-[14px]"
               onClick={onNavigateToBacktest}
             >
               确认策略并配置回测

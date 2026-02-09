@@ -7,10 +7,12 @@ import pandas_ta as ta
 from datetime import datetime
 
 # ==========================================================
-# STRATEGY: Wyckoff Accumulation (Phase C - Spring)
-# TYPE:     Pure Price Action / Smart Money Concepts
+# FILE:      20260209_wyckoff_spring-spot.py
+# STRATEGY:  Wyckoff Accumulation (Phase C - Spring)
+# TYPE:      Pure Price Action / Smart Money Concepts
 # FRAMEWORK: CCXT + Pandas-TA
 # TIMEFRAME: 4H / 1D
+# MARKET:    Spot
 # ==========================================================
 
 class WyckoffSpringStrategy:
@@ -205,11 +207,13 @@ if __name__ == '__main__':
 interface StrategyCodeBadgeProps {
   strategyName?: string;
   fileName?: string;
+  marketType?: "spot" | "futures";
 }
 
 export function StrategyCodeBadge({
   strategyName = "Wyckoff_Spring_Strategy",
-  fileName = "Wyckoff_Spring_Strategy.py",
+  fileName = "20260209_wyckoff_spring-spot.py",
+  marketType = "spot",
 }: StrategyCodeBadgeProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -220,33 +224,34 @@ export function StrategyCodeBadge({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const marketLabel = marketType === "spot" ? "Spot" : "Futures";
+
   return (
     <>
       {/* Compact Badge */}
-      <div className="space-y-1.5">
-        <span className="text-[12px] text-[#71717a] tracking-tight font-medium">
+      <div className="space-y-1">
+        <span className="text-[11px] text-[#71717a] tracking-tight font-medium pl-1">
           交易策略文件
         </span>
         <button
           onClick={() => setIsOpen(true)}
-          className="w-full flex items-center justify-between bg-[#0a0a0a] border border-[#1f1f23] hover:border-[#3b82f6]/50 rounded-xl px-4 py-2.5 transition-all duration-200 group"
+          className="w-full flex items-center justify-between bg-[#111114] border border-[#2a2a30] hover:border-[#3b82f6]/60 rounded-lg px-3.5 py-2.5 transition-all duration-200 group shadow-sm shadow-black/20"
         >
-          <div className="flex items-center gap-2.5">
-            <Code2 className="w-4 h-4 text-[#10b981]" />
-            <span className="text-white font-mono text-[13px] tracking-tight">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-6 h-6 rounded bg-[#10b981]/10 flex items-center justify-center flex-shrink-0">
+              <Code2 className="w-3.5 h-3.5 text-[#10b981]" />
+            </div>
+            <span className="text-[#e5e7eb] font-mono text-[12px] tracking-tight truncate">
               {fileName}
             </span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[12px] text-[#71717a] group-hover:text-[#3b82f6] transition-colors">
-              查看策略逻辑
+          <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+            <span className="text-[11px] text-[#52525b] group-hover:text-[#3b82f6] transition-colors hidden sm:inline">
+              查看逻辑
             </span>
-            <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 bg-[#10b981] rounded-full"></div>
-              <span className="text-[#10b981] text-[11px] font-mono font-medium tracking-tight">
-                Ready
-              </span>
-            </div>
+            <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded bg-[#10b981]/10 text-[#10b981] border border-[#10b981]/20">
+              {marketLabel}
+            </span>
           </div>
         </button>
       </div>
@@ -268,10 +273,10 @@ export function StrategyCodeBadge({
                 <Code2 className="w-5 h-5 text-[#10b981]" />
                 <div>
                   <h3 className="text-white font-mono text-[14px] tracking-tight">
-                    {strategyName}
+                    {fileName}
                   </h3>
                   <p className="text-[11px] text-[#71717a] font-mono mt-0.5">
-                    CCXT + Pandas-TA | 4H / 1D | Pure Price Action
+                    {strategyName} | CCXT + Pandas-TA | 4H / 1D | {marketLabel}
                   </p>
                 </div>
               </div>

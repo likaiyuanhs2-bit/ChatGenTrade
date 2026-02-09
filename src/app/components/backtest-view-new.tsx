@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Play, RotateCcw, Download, Send, Upload, ChevronDown, ChevronUp, Loader2, TrendingUp, TrendingDown, Target, Code2, Sparkles, Rocket } from "lucide-react";
+import { ArrowLeft, RotateCcw, Upload, Loader2, TrendingUp, TrendingDown, Target, Sparkles, Rocket, Send } from "lucide-react";
 import { CandlestickChart } from "./candlestick-chart";
 import { CustomBacktestChat } from "./custom-backtest-chat";
 import { TradeLogs } from "./trade-logs";
-import { SyntaxHighlighter } from "./syntax-highlighter";
+import { StrategyCodeBadge } from "./strategy-code-modal";
 import { motion } from "motion/react";
 
 interface BacktestParams {
@@ -16,8 +16,8 @@ interface BacktestParams {
 }
 
 interface BacktestViewNewProps {
-  strategyType?: "spot" | "futures"; // 从 step1 传入的策略类型
-  onNavigateToDeploy?: () => void; // 导航到部署页面的回调
+  strategyType?: "spot" | "futures";
+  onNavigateToDeploy?: () => void;
 }
 
 // 生成K线数据
@@ -61,92 +61,13 @@ const tradeSignals = [
   { time: "2024-01-28", type: "sell" as const, price: candlestickData[27].close },
 ];
 
-// 策略代码示例
-const strategyCode = `# Wyckoff Spring Strategy v1.0
-
-def detect_accumulation_range(bars, period=50):
-    """识别吸筹区间"""
-    highs = [bar.high for bar in bars[-period:]]
-    lows = [bar.low for bar in bars[-period:]]
-    
-    resistance = max(highs)
-    support = min(lows)
-    range_size = resistance - support
-    
-    return {
-        'support': support,
-        'resistance': resistance,
-        'range': range_size
-    }
-
-def detect_spring(bar, prev_bars, accumulation):
-    """检测弹簧(Spring)信号"""
-    support = accumulation['support']
-    avg_volume = sum([b.volume for b in prev_bars]) / len(prev_bars)
-    
-    # 条件1: 价格跌破支撑位
-    spring_low = bar.low < support
-    
-    # 条件2: 收盘价收回区间内
-    close_above = bar.close > support
-    
-    # 条件3: 成交量放大 (2倍以上)
-    volume_climax = bar.volume > avg_volume * 2.0
-    
-    return spring_low and close_above and volume_climax
-
-def wait_for_test(bars, spring_bar, accumulation):
-    """等待二次测试"""
-    support = accumulation['support']
-    
-    for bar in bars:
-        # 回调至支撑位附近
-        near_support = abs(bar.low - support) / support < 0.02
-        
-        # K线形态确认: 看涨吞没或Pinbar
-        bullish_engulfing = (
-            bar.close > bar.open and
-            bar.close > bars[-1].close and
-            bar.open < bars[-1].open
-        )
-        
-        pinbar = (
-            (bar.high - bar.close) < (bar.close - bar.low) * 0.3 and
-            (bar.close - bar.low) > (bar.high - bar.low) * 0.6
-        )
-        
-        if near_support and (bullish_engulfing or pinbar):
-            return True
-    
-    return False
-
-# 主策略逻辑
-def strategy_logic(bars):
-    accumulation = detect_accumulation_range(bars)
-    
-    if detect_spring(bars[-1], bars[-20:], accumulation):
-        if wait_for_test(bars[-5:], bars[-1], accumulation):
-            # 入场信号
-            entry_price = bars[-1].close
-            stop_loss = bars[-1].low * 0.98
-            take_profit = accumulation['resistance']
-            
-            return {
-                'action': 'BUY',
-                'entry': entry_price,
-                'stop_loss': stop_loss,
-                'take_profit': take_profit
-            }
-    
-    return None`;
-
 export function BacktestViewNew({ strategyType = "spot", onNavigateToDeploy }: BacktestViewNewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isCustomMode, setIsCustomMode] = useState(false);
   const [message, setMessage] = useState("");
   const [isThinking, setIsThinking] = useState(false);
   const [chatMessages, setChatMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
-  const [strategyModified, setStrategyModified] = useState(false); // 追踪策略是否被修改
+  const [strategyModified, setStrategyModified] = useState(false);
   
   const [params, setParams] = useState<BacktestParams>({
     dataSource: "Binance Spot",
@@ -159,11 +80,9 @@ export function BacktestViewNew({ strategyType = "spot", onNavigateToDeploy }: B
   
   const [originalParams, setOriginalParams] = useState(params);
   
-  // 检测参数是否有变化或策略是否被修改
   const hasParamsChanged = JSON.stringify(params) !== JSON.stringify(originalParams);
   const canRunBacktest = hasParamsChanged || strategyModified;
   
-  // 初始加载（模拟回测）
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -173,7 +92,6 @@ export function BacktestViewNew({ strategyType = "spot", onNavigateToDeploy }: B
     return () => clearTimeout(timer);
   }, []);
   
-  // 数据源选项（根据策略类型禁用期货/现货）
   const dataSourceOptions = [
     { value: "Binance Spot", label: "Binance Spot", disabled: strategyType === "futures" },
     { value: "OKX Spot", label: "OKX Spot", disabled: strategyType === "futures" },
@@ -188,41 +106,33 @@ export function BacktestViewNew({ strategyType = "spot", onNavigateToDeploy }: B
     setTimeout(() => {
       setIsLoading(false);
       setOriginalParams(params);
-      setStrategyModified(false); // 重置策略修改标记
+      setStrategyModified(false);
     }, 3000);
   };
   
   const handleSendMessage = () => {
     if (!message.trim() || isThinking) return;
     
-    // 检测关键词
     const lowerMessage = message.toLowerCase();
     const isOptimizeRequest = lowerMessage.includes("优化代码") || lowerMessage.includes("更新代码");
 
     if (isOptimizeRequest) {
-      // 添加用户消息
       setChatMessages([...chatMessages, { role: "user", content: message }]);
       setMessage("");
       setIsThinking(true);
 
-      // 模拟AI思考过程 (2秒)
       setTimeout(() => {
         setIsThinking(false);
-        
-        // 添加AI回复
         setChatMessages((prev) => [
           ...prev,
           {
             role: "assistant",
-            content: "我已经对策略代码进行了优化：\\n\\n✓ 增加了缓存机制，避免重复计算交易区间\\n✓ 优化了成交量计算逻辑，使用滑动窗口提升性能\\n✓ 添加了更严格的风险控制，最小盈亏比从2.0提升至3.0\\n✓ 改进了K线形态识别算法，减少假信号\\n\\n代码优化已完成。",
+            content: "我已经对策略代码进行了优化：\n\n✓ 增加了缓存机制，避免重复计算交易区间\n✓ 优化了成交量计算逻辑，使用滑动窗口提升性能\n✓ 添加了更严格的风险控制，最小盈亏比从2.0提升至3.0\n✓ 改进了K线形态识别算法，减少假信号\n\n代码优化已完成。",
           },
         ]);
-        
-        // 标记策略已修改
         setStrategyModified(true);
       }, 2000);
     } else {
-      // 普通消息处理
       setChatMessages([...chatMessages, 
         { role: "user", content: message },
         { role: "assistant", content: "好的，我会根据您的建议来调整策略。" }
@@ -235,58 +145,24 @@ export function BacktestViewNew({ strategyType = "spot", onNavigateToDeploy }: B
   if (isCustomMode) {
     return (
       <div className="h-full flex flex-col bg-black">
-        <div className="h-[73px] px-6 border-b border-[#1f1f23] flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setIsCustomMode(false)}
-              className="flex items-center gap-2 px-4 py-2 text-[#a1a1aa] hover:text-white hover:bg-[#0a0a0a] rounded-xl transition-all"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="text-[15px] font-medium tracking-tight">返回标准回测</span>
-            </button>
-          </div>
+        <div className="px-6 pt-4 pb-2 flex items-center justify-between">
+          <button
+            onClick={() => setIsCustomMode(false)}
+            className="flex items-center gap-2 px-4 py-2 text-[#a1a1aa] hover:text-white hover:bg-[#0a0a0a] rounded-xl transition-all"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="text-[15px] font-medium tracking-tight">返回标准回测</span>
+          </button>
+        </div>
+
+        {/* Strategy Code Badge */}
+        <div className="px-6 pb-3">
+          <StrategyCodeBadge />
         </div>
         
-        {/* 左右分屏布局 */}
-        <div className="flex-1 flex min-h-0">
-          {/* 左侧对话区域 60% */}
-          <div className="w-[60%] border-r border-[#1f1f23] h-full">
-            <CustomBacktestChat />
-          </div>
-          
-          {/* 右侧策略代码 40% */}
-          <div className="w-[40%] flex flex-col h-full bg-black">
-            <div className="flex-1 overflow-y-auto px-6 py-6 min-h-0">
-              {/* File Header - 与step1一致 */}
-              <div className="mb-4 bg-[#0a0a0a] border border-[#1f1f23] rounded-xl p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2.5">
-                    <Code2 className="w-4 h-4 text-[#10b981]" />
-                    <span className="text-white font-mono text-[13px] tracking-tight">Wyckoff_Spring_Strategy.py</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 bg-[#10b981] rounded-full"></div>
-                    <span className="text-[#10b981] text-[11px] font-mono font-medium tracking-tight">Ready</span>
-                  </div>
-                </div>
-                <div className="text-[11px] text-[#71717a] font-mono space-y-0.5">
-                  <div>Type: Pure Price Action / Smart Money</div>
-                  <div>Timeframe: 4H / 1D</div>
-                </div>
-              </div>
-              
-              {/* 代码编辑器 */}
-              <SyntaxHighlighter language="python" code={strategyCode} />
-            </div>
-            
-            {/* 底部部署按钮 */}
-            <div className="border-t border-[#1f1f23] px-6 py-5 flex-shrink-0">
-              <button className="w-full py-3.5 rounded-xl text-[15px] font-medium bg-gradient-to-r from-[#10b981] to-[#059669] hover:shadow-lg hover:shadow-green-500/20 text-white transition-all flex items-center justify-center gap-2.5">
-                <Rocket className="w-5 h-5" />
-                回测模拟完整，部署策略至模拟盘
-              </button>
-            </div>
-          </div>
+        {/* Chat Area */}
+        <div className="flex-1 min-h-0 border-t border-[#1f1f23]">
+          <CustomBacktestChat />
         </div>
       </div>
     );
@@ -492,29 +368,15 @@ export function BacktestViewNew({ strategyType = "spot", onNavigateToDeploy }: B
       
       {/* 右侧策略对话区域 40% */}
       <div className="w-[40%] flex flex-col bg-black">
-        {/* 策略代码展示 - 可滚动 */}
-        <div className="flex-1 overflow-y-auto px-6 py-6">
-          {/* File Header - 与step1一致 */}
-          <div className="mb-4 bg-[#0a0a0a] border border-[#1f1f23] rounded-xl p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2.5">
-                <Code2 className="w-4 h-4 text-[#10b981]" />
-                <span className="text-white font-mono text-[13px] tracking-tight">Wyckoff_Spring_Strategy.py</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 bg-[#10b981] rounded-full"></div>
-                <span className="text-[#10b981] text-[11px] font-mono font-medium tracking-tight">Ready</span>
-              </div>
-            </div>
-            <div className="text-[11px] text-[#71717a] font-mono space-y-0.5">
-              <div>Type: Pure Price Action / Smart Money</div>
-              <div>Timeframe: 4H / 1D</div>
-            </div>
-          </div>
-          
-          {/* 对话消息 */}
+        {/* Strategy Code Badge - Top */}
+        <div className="px-6 pt-4 pb-2 flex-shrink-0">
+          <StrategyCodeBadge />
+        </div>
+
+        {/* 对话消息 */}
+        <div className="flex-1 overflow-y-auto px-6 py-4">
           {chatMessages.length > 0 && (
-            <div className="mb-4 space-y-3">
+            <div className="space-y-3">
               {chatMessages.map((msg, idx) => (
                 <div key={idx} className={`flex gap-3 ${msg.role === "user" ? "justify-end" : ""}`}>
                   {msg.role === "assistant" && (
@@ -537,7 +399,6 @@ export function BacktestViewNew({ strategyType = "spot", onNavigateToDeploy }: B
                 </div>
               ))}
               
-              {/* 思考状态 */}
               {isThinking && (
                 <div className="flex gap-3">
                   <div className="w-8 h-8 bg-gradient-to-br from-[#3b82f6] to-[#2563eb] rounded-full flex items-center justify-center flex-shrink-0">
@@ -550,13 +411,10 @@ export function BacktestViewNew({ strategyType = "spot", onNavigateToDeploy }: B
               )}
             </div>
           )}
-          
-          {/* 代码编辑器 */}
-          <SyntaxHighlighter language="python" code={strategyCode} />
         </div>
         
-        {/* 底部对话框 + 发起回测按钮 */}
-        <div className="border-t border-[#1f1f23] px-6 py-5 space-y-3">
+        {/* 底部对话框 + 回测/部署按钮 */}
+        <div className="border-t border-[#1f1f23] px-6 py-5 space-y-3 flex-shrink-0">
           <div className="flex gap-3">
             <input
               type="text"

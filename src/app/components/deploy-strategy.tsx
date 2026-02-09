@@ -1,85 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Code2, Sparkles, Loader2, CheckCircle2, Rocket, BarChart3, ExternalLink, AlertCircle } from "lucide-react";
-import { SyntaxHighlighter } from "./syntax-highlighter";
-
-// 策略代码示例
-const strategyCode = `# Wyckoff Spring Strategy v1.0
-
-def detect_accumulation_range(bars, period=50):
-    """识别吸筹区间"""
-    highs = [bar.high for bar in bars[-period:]]
-    lows = [bar.low for bar in bars[-period:]]
-    
-    resistance = max(highs)
-    support = min(lows)
-    range_size = resistance - support
-    
-    return {
-        'support': support,
-        'resistance': resistance,
-        'range': range_size
-    }
-
-def detect_spring(bar, prev_bars, accumulation):
-    """检测弹簧(Spring)信号"""
-    support = accumulation['support']
-    avg_volume = sum([b.volume for b in prev_bars]) / len(prev_bars)
-    
-    # 条件1: 价格跌破支撑位
-    spring_low = bar.low < support
-    
-    # 条件2: 收盘价收回区间内
-    close_above = bar.close > support
-    
-    # 条件3: 成交量放大 (2倍以上)
-    volume_climax = bar.volume > avg_volume * 2.0
-    
-    return spring_low and close_above and volume_climax
-
-def wait_for_test(bars, spring_bar, accumulation):
-    """等待二次测试"""
-    support = accumulation['support']
-    
-    for bar in bars:
-        # 回调至支撑位附近
-        near_support = abs(bar.low - support) / support < 0.02
-        
-        # K线形态确认: 看涨吞没或Pinbar
-        bullish_engulfing = (
-            bar.close > bar.open and
-            bar.close > bars[-1].close and
-            bar.open < bars[-1].open
-        )
-        
-        pinbar = (
-            (bar.high - bar.close) < (bar.close - bar.low) * 0.3 and
-            (bar.close - bar.low) > (bar.high - bar.low) * 0.6
-        )
-        
-        if near_support and (bullish_engulfing or pinbar):
-            return True
-    
-    return False
-
-# 主策略逻辑
-def strategy_logic(bars):
-    accumulation = detect_accumulation_range(bars)
-    
-    if detect_spring(bars[-1], bars[-20:], accumulation):
-        if wait_for_test(bars[-5:], bars[-1], accumulation):
-            # 入场信号
-            entry_price = bars[-1].close
-            stop_loss = bars[-1].low * 0.98
-            take_profit = accumulation['resistance']
-            
-            return {
-                'action': 'BUY',
-                'entry': entry_price,
-                'stop_loss': stop_loss,
-                'take_profit': take_profit
-            }
-    
-    return None`;
+import { Send, Sparkles, Loader2, CheckCircle2, Rocket, BarChart3, ExternalLink, AlertCircle } from "lucide-react";
+import { StrategyCodeBadge } from "./strategy-code-modal";
 
 interface Message {
   type: "ai" | "user";
@@ -401,9 +322,14 @@ export function DeployStrategy({ onNavigateToDashboard }: DeployStrategyProps) {
   };
 
   return (
-    <div className="h-full flex bg-black">
-      {/* 中间对话区域 60% */}
-      <div className="w-[60%] flex flex-col border-r border-[#1f1f23]">
+    <div className="h-full flex flex-col bg-black">
+      {/* Strategy Code Badge - Top */}
+      <div className="px-6 pt-4 pb-2 flex-shrink-0">
+        <StrategyCodeBadge />
+      </div>
+
+      {/* 对话区域 */}
+      <div className="flex-1 flex flex-col min-h-0">
         {/* 消息列表 */}
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
           {messages.map((message, index) => (
@@ -590,7 +516,7 @@ export function DeployStrategy({ onNavigateToDashboard }: DeployStrategyProps) {
                             <div className="text-[#71717a]">  数量: 0.001 {config.pair.split('/')[0]}</div>
                             <div className="text-[#71717a]">  价格: $2,750.00 (当前价-3%)</div>
                             <div className="text-[#71717a]">  订单ID: #TEST_85721943</div>
-                            <div className="text-[#10b981] mt-1">  状态: 已下单 → 已撤销 ✓</div>
+                            <div className="text-[#10b981] mt-1">  状态: ��下单 → 已撤销 ✓</div>
                             <div className="text-white mt-3">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
                             <div className="text-[#10b981]">✓ 小额挂单成交测试</div>
                             <div className="text-[#71717a]">  订单类型: LIMIT_BUY</div>
@@ -705,49 +631,6 @@ export function DeployStrategy({ onNavigateToDashboard }: DeployStrategyProps) {
               <Send className="w-5 h-5" />
             </button>
           </div>
-        </div>
-      </div>
-
-      {/* 右侧策略代码 40% */}
-      <div className="w-[40%] flex flex-col bg-black">
-        <div className="flex-1 overflow-y-auto px-6 py-6">
-          {/* File Header */}
-          <div className="mb-4 bg-[#0a0a0a] border border-[#1f1f23] rounded-xl p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2.5">
-                <Code2 className="w-4 h-4 text-[#10b981]" />
-                <span className="text-white font-mono text-[13px] tracking-tight">
-                  Wyckoff_Spring_Strategy.py
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    messages.some((m) => m.component === "success") ? "bg-[#10b981]" : "bg-[#3b82f6]"
-                  }`}
-                ></div>
-                <span
-                  className={`text-[11px] font-mono font-medium tracking-tight ${
-                    messages.some((m) => m.component === "success") ? "text-[#10b981]" : "text-[#3b82f6]"
-                  }`}
-                >
-                  {messages.some((m) => m.component === "success") ? "Running" : "Ready"}
-                </span>
-              </div>
-            </div>
-            <div className="text-[11px] text-[#71717a] font-mono space-y-0.5">
-              <div>Type: Pure Price Action / Smart Money</div>
-              <div>Timeframe: 4H / 1D</div>
-              {messages.some((m) => m.component === "success") && (
-                <div className="text-[#10b981] mt-1">
-                  ● Live on {config.exchange} {config.market} - {config.pair}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* 代码编辑器 */}
-          <SyntaxHighlighter language="python" code={strategyCode} />
         </div>
       </div>
     </div>

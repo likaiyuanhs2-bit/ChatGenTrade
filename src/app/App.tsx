@@ -8,7 +8,7 @@ import { Settings } from "./components/settings";
 import { BacktestViewNew } from "./components/backtest-view-new";
 import { StrategyDetailWithEditor } from "./components/strategy-detail-with-editor";
 import { DeployStrategy } from "./components/deploy-strategy";
-import { PRDFlow } from "./components/prd-flow";
+
 
 export default function App() {
   const [activePage, setActivePage] = useState("chat");
@@ -39,13 +39,6 @@ export default function App() {
 
   const getPageContent = () => {
     switch (activePage) {
-      case "prdflow":
-        return {
-          useStepHeader: false,
-          title: "PRDflow - 产品流程图",
-          breadcrumbs: [{ label: "PRDflow" }],
-          component: <PRDFlow />,
-        };
       case "chat":
         return {
           useStepHeader: true,

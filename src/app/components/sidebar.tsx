@@ -1,4 +1,4 @@
-import { MessageSquare, LayoutDashboard, Settings, GitBranch } from "lucide-react";
+import { MessageSquare, LayoutDashboard, Settings } from "lucide-react";
 
 interface SidebarProps {
   activePage: string;
@@ -51,25 +51,6 @@ export function Sidebar({ activePage, onNavigate }: SidebarProps) {
           );
         })}
       </nav>
-
-      {/* PRDflow Special Tab */}
-      <div className="px-3 pb-3">
-        <button
-          onClick={() => onNavigate("prdflow")}
-          className={`w-full flex items-center justify-center gap-2.5 px-4 py-4 rounded-xl transition-all duration-300 border-2 ${
-            activePage === "prdflow"
-              ? "bg-gradient-to-r from-[#8b5cf6] to-[#6366f1] border-[#8b5cf6] shadow-lg shadow-[#8b5cf6]/20"
-              : "bg-gradient-to-r from-[#8b5cf6]/10 to-[#6366f1]/10 border-[#8b5cf6]/30 hover:border-[#8b5cf6]/60 hover:shadow-md hover:shadow-[#8b5cf6]/10"
-          }`}
-        >
-          <GitBranch className={`w-5 h-5 ${activePage === "prdflow" ? "text-white" : "text-[#c4b5fd]"}`} />
-          <span className={`text-[16px] font-bold tracking-tight ${
-            activePage === "prdflow" ? "text-white" : "text-[#c4b5fd]"
-          }`}>
-            PRDflow
-          </span>
-        </button>
-      </div>
 
       {/* User Profile Card */}
       <div className="px-3 py-4 border-t border-[#1f1f23]">
